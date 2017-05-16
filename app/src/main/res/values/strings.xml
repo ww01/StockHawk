@@ -28,8 +28,13 @@
 
     <string name="error_no_network">No network connectivity! Will load stock cursor when the network is available.</string>
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
+    <string name="error_no_such_stock">The stock you entered could not be found.</string>
 
     <string name="toast_stock_added_no_connectivity">Symbol %s added. Will refresh when network available.</string>
     <string name="toast_no_connectivity">Will refresh when network available.</string>
+    <string name="toast_stock_added">Selected stock has been added to your portfolio.</string>
+
+    <string name="content_change_units">Change units</string>
+    <string name="content_add_stock">Add stock</string>
 
 </resources>

@@ -7,6 +7,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,18 +15,25 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.task.StockFindTask;
+
+import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import yahoofinance.Stock;
+import yahoofinance.YahooFinance;
 
 
-public class AddStockDialog extends DialogFragment {
+public class AddStockDialog extends DialogFragment implements IStockUpdate {
 
     @SuppressWarnings("WeakerAccess")
     @BindView(R.id.dialog_stock)
     EditText stock;
+
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -67,11 +75,21 @@ public class AddStockDialog extends DialogFragment {
 
     private void addStock() {
         Activity parent = getActivity();
+
+        Log.d("parent_is_main", String.valueOf(parent instanceof MainActivity));
         if (parent instanceof MainActivity) {
-            ((MainActivity) parent).addStock(stock.getText().toString());
+            String symbol = stock.getText().toString();
+            StockFindTask findTask = new StockFindTask(parent);
+            findTask.execute(symbol);
         }
         dismissAllowingStateLoss();
     }
 
-
+    @Override
+    public void updateStock(Activity parent, Stock data) {
+        if(data != null && data.getName() != null)
+            ((MainActivity) parent).addStock(data.getSymbol());
+        else
+            Toast.makeText(parent, R.string.error_no_such_stock, Toast.LENGTH_LONG).show();
+    }
 }

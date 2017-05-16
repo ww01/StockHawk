@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
@@ -52,6 +53,11 @@ public final class QuoteSyncJob {
 
             Set<String> stockPref = PrefUtils.getStocks(context);
             Set<String> stockCopy = new HashSet<>();
+
+            for(String st : stockPref){
+                Log.d("stock_symbol", st);
+            }
+
             stockCopy.addAll(stockPref);
             String[] stockArray = stockPref.toArray(new String[stockPref.size()]);
 
@@ -60,6 +66,8 @@ public final class QuoteSyncJob {
             if (stockArray.length == 0) {
                 return;
             }
+
+
 
             Map<String, Stock> quotes = YahooFinance.get(stockArray);
             Iterator<String> iterator = stockCopy.iterator();
@@ -70,10 +78,17 @@ public final class QuoteSyncJob {
 
             while (iterator.hasNext()) {
                 String symbol = iterator.next();
-
-
                 Stock stock = quotes.get(symbol);
+
+                if(stock.getName() == null){
+                    // clearing any junk data
+                    PrefUtils.removeStock(context, symbol);
+                    continue;
+                }
+
+
                 StockQuote quote = stock.getQuote();
+
 
                 float price = quote.getPrice().floatValue();
                 float change = quote.getChange().floatValue();
