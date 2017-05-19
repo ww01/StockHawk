@@ -3,18 +3,24 @@ package com.udacity.stockhawk.data;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import static com.udacity.stockhawk.sync.QuoteSyncJob.ACTION_DATA_UPDATED;
 
 
 public class StockProvider extends ContentProvider {
 
     private static final int QUOTE = 100;
     private static final int QUOTE_FOR_SYMBOL = 101;
+    private static final int QUOTE_HISTORY = 102;
+    private static final int QUOTE_DELETE = 103;
 
     private static final UriMatcher uriMatcher = buildUriMatcher();
 
@@ -24,6 +30,8 @@ public class StockProvider extends ContentProvider {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE, QUOTE);
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE_WITH_SYMBOL, QUOTE_FOR_SYMBOL);
+        matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE_WITH_SYMBOL, QUOTE_HISTORY);
+        matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE_DELETE, QUOTE_DELETE);
         return matcher;
     }
 
@@ -39,6 +47,7 @@ public class StockProvider extends ContentProvider {
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor returnCursor;
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Log.d("query", uri.toString());
 
         switch (uriMatcher.match(uri)) {
             case QUOTE:
@@ -65,6 +74,8 @@ public class StockProvider extends ContentProvider {
                 );
 
                 break;
+
+
             default:
                 throw new UnsupportedOperationException("Unknown URI:" + uri);
         }
@@ -98,6 +109,7 @@ public class StockProvider extends ContentProvider {
                 );
                 returnUri = Contract.Quote.URI;
                 break;
+
             default:
                 throw new UnsupportedOperationException("Unknown URI:" + uri);
         }
@@ -118,6 +130,8 @@ public class StockProvider extends ContentProvider {
         if (null == selection) {
             selection = "1";
         }
+
+        Log.d("uri_delete", uri.toString());
         switch (uriMatcher.match(uri)) {
             case QUOTE:
                 rowsDeleted = db.delete(
@@ -136,6 +150,13 @@ public class StockProvider extends ContentProvider {
                         selectionArgs
                 );
                 break;
+            case QUOTE_DELETE:
+                rowsDeleted = db.delete(
+                        Contract.Quote.TABLE_NAME,
+                        Contract.Quote.COLUMN_SYMBOL + "=?",
+                        selectionArgs
+                );
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown URI:" + uri);
         }
@@ -144,6 +165,8 @@ public class StockProvider extends ContentProvider {
             Context context = getContext();
             if (context != null){
                 context.getContentResolver().notifyChange(uri, null);
+                Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
+                context.sendBroadcast(dataUpdatedIntent);
             }
         }
 

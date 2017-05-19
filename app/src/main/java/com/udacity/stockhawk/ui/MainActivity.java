@@ -1,9 +1,7 @@
 package com.udacity.stockhawk.ui;
 
-import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -13,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,15 +19,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.udacity.stockhawk.R;
-import com.udacity.stockhawk.Util.NetworkUtil;
+import com.udacity.stockhawk.util.NetworkUtil;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
-import com.udacity.stockhawk.task.StockFindTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
+
+import static com.udacity.stockhawk.sync.QuoteSyncJob.ACTION_DATA_UPDATED;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
         SwipeRefreshLayout.OnRefreshListener,
@@ -49,6 +49,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onClick(String symbol) {
         Timber.d("Symbol clicked: %s", symbol);
+
+        if(symbol == null || symbol.length() == 0){
+            Toast.makeText(this, R.string.error_no_such_stock, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra(Contract.PATH_QUOTE, symbol);
+        startActivity(intent);
     }
 
     @Override
@@ -57,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
         adapter = new StockAdapter(this, this);
         stockRecyclerView.setAdapter(adapter);
         stockRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -78,7 +86,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 String symbol = adapter.getSymbolAtPosition(viewHolder.getAdapterPosition());
                 PrefUtils.removeStock(MainActivity.this, symbol);
-                getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
+               // getContentResolver().delete(Contract.Quote.makeUriForStock(symbol), null, null);
+                getContentResolver().delete(Contract.URI_DELETE, null, new String[]{symbol});
+
             }
         }).attachToRecyclerView(stockRecyclerView);
 
@@ -143,7 +153,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         if (data.getCount() != 0) {
             error.setVisibility(View.GONE);
-        }
+        } else
+            error.setVisibility(View.VISIBLE);
+
+        Log.d("pobranych", String.valueOf(data.getCount()));
+
         adapter.setCursor(data);
     }
 

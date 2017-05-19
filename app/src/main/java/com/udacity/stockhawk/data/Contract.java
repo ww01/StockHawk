@@ -8,10 +8,13 @@ import com.google.common.collect.ImmutableList;
 
 public final class Contract {
 
-    static final String AUTHORITY = "com.udacity.stockhawk";
-    static final String PATH_QUOTE = "quote";
-    static final String PATH_QUOTE_WITH_SYMBOL = "quote/*";
+    public static final String AUTHORITY = "com.udacity.stockhawk";
+    public static final String PATH_QUOTE = "quote";
+    public static final String PATH_QUOTE_WITH_SYMBOL = "quote/*";
+    public static final String PATH_QUOTE_HISTORY = "quote-history/*";
+    public static final String PATH_QUOTE_DELETE = "quote-delete";
     private static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
+    public static final Uri URI_DELETE = BASE_URI.buildUpon().appendPath(PATH_QUOTE_DELETE).build();
 
     private Contract() {
     }
@@ -49,6 +52,13 @@ public final class Contract {
             return queryUri.getLastPathSegment();
         }
 
+        public static Uri makeUriForStockHistory(String symbol){
+            return URI.buildUpon().appendPath(symbol).build();
+        }
+
+        static String getStockHistoryFromUri(Uri queryUri) {
+            return queryUri.getLastPathSegment();
+        }
 
     }
 
