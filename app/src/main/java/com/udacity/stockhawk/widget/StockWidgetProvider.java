@@ -24,7 +24,7 @@ public class StockWidgetProvider extends AppWidgetProvider {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_list);
 
             setRemoteAdapter(context, views);
-            
+
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
     }

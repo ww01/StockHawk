@@ -53,10 +53,14 @@ public class StockWidgetViewsFactory implements RemoteViewsService.RemoteViewsFa
         }
 
         RemoteViews remoteViews = new RemoteViews(this.context.getPackageName(), R.layout.widget_stock_item);
-        Log.d("remote_view_symbol",  data.getString(Contract.Quote.POSITION_SYMBOL));
-
         remoteViews.setTextViewText(R.id.widget_item_symbol, data.getString(Contract.Quote.POSITION_SYMBOL));
-        remoteViews.setTextViewText(R.id.widget_item_price, String.valueOf(data.getDouble(Contract.Quote.POSITION_PRICE)));
+        remoteViews.setTextViewText(R.id.widget_item_price,
+                String.format(
+                        this.context.getResources().getConfiguration().locale,
+                        "%.2f",
+                        data.getDouble(Contract.Quote.POSITION_PRICE)
+                )
+        );
 
         return remoteViews;
     }
