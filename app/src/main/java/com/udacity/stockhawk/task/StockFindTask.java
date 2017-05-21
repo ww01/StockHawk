@@ -12,6 +12,7 @@ import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.regex.Pattern;
 
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
@@ -32,12 +33,18 @@ public class StockFindTask extends AsyncTask<String, Void, Stock> {
     @Override
     protected Stock doInBackground(String... strings) {
 
-        Log.d("stock_in_bg", "true");
         if(strings.length == 0)
             return null;
+
+        String s = strings[0];
+
+        Pattern p = Pattern.compile("[^a-zA-Z0-9]");
+        boolean hasSpecialChar = p.matcher(s).find();
+
+        if(hasSpecialChar)
+            return null;
         try {
-            Log.d("stock_find", "true");
-            return YahooFinance.get(strings[0]);
+            return YahooFinance.get(s);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,7 +55,6 @@ public class StockFindTask extends AsyncTask<String, Void, Stock> {
 
     @Override
     public void onPostExecute(Stock stock){
-        Log.d("stock_post_exec", "true");
         if(this.weakContext.get() == null)
             return;
 

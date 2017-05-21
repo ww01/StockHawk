@@ -30,7 +30,6 @@ public class StockProvider extends ContentProvider {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE, QUOTE);
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE_WITH_SYMBOL, QUOTE_FOR_SYMBOL);
-        matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE_WITH_SYMBOL, QUOTE_HISTORY);
         matcher.addURI(Contract.AUTHORITY, Contract.PATH_QUOTE_DELETE, QUOTE_DELETE);
         return matcher;
     }
@@ -47,7 +46,8 @@ public class StockProvider extends ContentProvider {
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor returnCursor;
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Log.d("query", uri.toString());
+        Log.d("query_uri", uri.toString());
+        Log.d("query_uri_match", String.valueOf(uriMatcher.match(uri)));
 
         switch (uriMatcher.match(uri)) {
             case QUOTE:
@@ -63,11 +63,13 @@ public class StockProvider extends ContentProvider {
                 break;
 
             case QUOTE_FOR_SYMBOL:
+                //Querry rewritten due to issues with Yahoo! Finance API
                 returnCursor = db.query(
                         Contract.Quote.TABLE_NAME,
                         projection,
-                        Contract.Quote.COLUMN_SYMBOL + " = ?",
-                        new String[]{Contract.Quote.getStockFromUri(uri)},
+                        null,
+                        //Contract.Quote.COLUMN_SYMBOL + " = ?",
+                        null,
                         null,
                         null,
                         sortOrder

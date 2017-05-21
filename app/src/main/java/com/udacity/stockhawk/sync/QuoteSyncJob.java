@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
+import com.udacity.stockhawk.mock.MockUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,15 +70,13 @@ public final class QuoteSyncJob {
 
 
 
-            Map<String, Stock> quotes = YahooFinance.get(stockArray);
 
-         //   DummyDataFeeder dataFeeder = new DummyDataFeeder(context);
-         //   Map<String, Stock> quotes = dataFeeder.getDummyStockList();
+            Map<String, Stock> quotes = YahooFinance.get(stockArray);
 
             Iterator<String> iterator = stockCopy.iterator();
 
             Timber.d(quotes.toString());
-            Log.d("quotes", quotes.toString());
+
             ArrayList<ContentValues> quoteCVs = new ArrayList<>();
 
             while (iterator.hasNext()) {
@@ -100,7 +99,10 @@ public final class QuoteSyncJob {
 
                 // WARNING! Don't request historical data for a stock that doesn't exist!
                 // The request will hang forever X_x
-               /* List<HistoricalQuote> history = stock.getHistory(from, to, Interval.WEEKLY);
+               //List<HistoricalQuote> history = stock.getHistory(from, to, Interval.WEEKLY);
+                //Changed due to permanent Yahoo! Api failure
+                List<HistoricalQuote> history = MockUtils.getHistory();
+
 
                 StringBuilder historyBuilder = new StringBuilder();
 
@@ -109,7 +111,7 @@ public final class QuoteSyncJob {
                     historyBuilder.append(", ");
                     historyBuilder.append(it.getClose());
                     historyBuilder.append("\n");
-                } */
+                }
                 ContentValues quoteCV = new ContentValues();
                 quoteCV.put(Contract.Quote.COLUMN_SYMBOL, symbol);
                 quoteCV.put(Contract.Quote.COLUMN_PRICE, price);
@@ -117,7 +119,7 @@ public final class QuoteSyncJob {
                 quoteCV.put(Contract.Quote.COLUMN_ABSOLUTE_CHANGE, change);
 
 
-              //  quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
+                quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
 
                 quoteCVs.add(quoteCV);
 
