@@ -24,19 +24,7 @@ public class StockWidgetProvider extends AppWidgetProvider {
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_list);
 
             setRemoteAdapter(context, views);
-
-            /*boolean useDetailActivity = context.getResources()
-                    .getBoolean(R.bool.use_chart_activity);
-            Intent clickIntentTemplate = useDetailActivity
-                    ? new Intent(context, ChartActivity.class)
-                    : new Intent(context, MainActivity.class);
-            PendingIntent clickPendingIntentTemplate = TaskStackBuilder.create(context)
-                    .addNextIntentWithParentStack(clickIntentTemplate)
-                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            views.setPendingIntentTemplate(R.id.widget_list, clickPendingIntentTemplate);
-            views.setEmptyView(R.id.widget_list, R.id.widget_empty); */
-
-            // Tell the AppWidgetManager to perform an update on the current app widget
+            
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
     }
